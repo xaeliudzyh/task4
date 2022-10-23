@@ -1,8 +1,10 @@
-﻿namespace Task1
+﻿using static Task1.Task1;
+
+namespace Task1
 {
     // Необходимо заменить на более подходящий тип (коллекцию), позволяющий
     // эффективно искать диапазон по заданному IP-адресу
-    using IPRangesDatabase = Object;
+    using IPRangesDatabase = List<IPRange>;
 
     public class Task1
     {
@@ -13,7 +15,33 @@
         */
         internal record IPv4Addr (string StrValue) : IComparable<IPv4Addr>
         {
-            internal uint IntValue = Ipstr2Int();
+            internal uint IntValue = Ipstr2Int(StrValue);
+
+            private static uint Ipstr2Int(string StrValue)
+            {
+                uint uValue = 0, square = 1;
+                for (int i = StrValue.Length - 1; i >= 0; i--)
+                {
+                    if (StrValue[i] != '.')
+                    {
+                        uint currentSum = 0;
+                        uint tens = 1;
+                        for (int j = i; j >= 0; j--)
+                        {
+                            if (StrValue[j] == '.') break;
+                            uint stoU = Convert.ToUInt32(StrValue[j].ToString());
+                            currentSum += stoU * tens;
+                            tens *= 10;
+                            i--;
+                        }
+
+                        uValue += currentSum * square;
+                        square *= 256;
+                    }
+                }
+
+                return uValue;
+            }
 
             private static uint Ipstr2Int()
             {
