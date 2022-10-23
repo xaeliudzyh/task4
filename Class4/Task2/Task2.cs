@@ -58,7 +58,7 @@ namespace Task2
             var allCodings = Encoding.GetEncodings();
 
             //Ïðîâåðêà ïðàâèëüíîñòè âõîäíûõ äàííûõ
-            if (CheckFile(fileName) &
+            if (CheckFile(fileName)&
                 CheckCoding(codingIn, allCodings) &
                 CheckCoding(codingOut, allCodings))
             {
