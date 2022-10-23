@@ -60,6 +60,11 @@ namespace Task1
             }
         }
 
+       /// <summary>
+        /// сделал класс для хранения диапазонов
+        /// </summary>
+        /// <param name="IpFrom"></param>
+        /// <param name="IpTo"></param>
         internal record class IPRange(IPv4Addr IpFrom, IPv4Addr IpTo)
         {
             public override string ToString()
@@ -68,23 +73,75 @@ namespace Task1
             }
         }
 
+        /// <summary>
+        /// хранение полученных данных
+        /// </summary>
+        /// <param name="IpsFile"></param>
+        /// <param name="IprsFiles"></param>
         internal record class IPLookupArgs(string IpsFile, List<string> IprsFiles);
-       
+        /// <summary>
+        /// преобразование этих данных
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
         internal static IPLookupArgs? ParseArgs(string[] args)
         {
-            throw new NotImplementedException();
+            if (args.Length <= 1)
+                return null;
+            
+            var ipsFile = args[0];
+            List<string> iprsFiles = args[1..].ToList();
+
+            return new IPLookupArgs(ipsFile, iprsFiles);
         }
 
+        /// <summary>
+        /// сделал список ip адресов
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
         internal static List<string> LoadQuery(string filename) {
-            throw new NotImplementedException();
+            return new List<string>(File.ReadAllLines(filename));
         }
-
+        
+        /// <summary>
+        /// коллекция для хранения диапазонов
+        /// </summary>
+        /// <param name="filenames"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
         internal static IPRangesDatabase LoadRanges(List<String> filenames) {
-            throw new NotImplementedException();
+            var ipRangesDatabase = new IPRangesDatabase();
+
+            foreach (var filename in filenames)
+            {
+                var ipRanges = new List<string>(File.ReadAllLines(filename));
+                foreach (var strIpRange in ipRanges)
+                {
+                    var strIps = strIpRange.Split(',');
+                    var ipRange = new IPRange(new IPv4Addr(strIps[0]), new IPv4Addr(strIps[1]));
+                    ipRangesDatabase.Add(ipRange);
+                }
+            }
+
+            return ipRangesDatabase;
         }
 
+        
+        /// <summary>
+        /// смотрим есть ли искомый IP в данном диапазоне
+        /// </summary>
+        /// <param name="ranges"></param>
+        /// <param name="query"></param>
+        /// <returns></returns>
         internal static IPRange? FindRange(IPRangesDatabase ranges, IPv4Addr query) {
-            throw new NotImplementedException();
+            foreach (var range in ranges)
+            {
+                if (query.CompareTo(range.IpFrom) >= 0 && query.CompareTo(range.IpTo) <= 0)
+                    return range;
+            }
+
+            return null;
         }
         
         public static void Main(string[] args)
@@ -94,20 +151,27 @@ namespace Task1
             {
                 return;
             }
-
             var queries = LoadQuery(ipLookupArgs.IpsFile);
-                var ranges = LoadRanges(ipLookupArgs.IprsFiles);
-                foreach (var ip in queries)
-                {
-                    var findRange = FindRange(ranges, new IPv4Addr(ip));
-                    var result = TODO<string>();
-                    Console.WriteLine($"{ip}: {result}");
-                }
+            var ranges = LoadRanges(ipLookupArgs.IprsFiles);
+            var file = args[0];
+
+            File.WriteAllText(file, string.Empty);
+
+            foreach (var ip in queries)
+            {
+                var findRange = FindRange(ranges, new IPv4Addr(ip));
+                var result = ShowTheResult(ip, findRange);
+
+                File.AppendAllText(file, result + Environment.NewLine);
+            }
         }
         
-        private static T TODO<T>()
+        private static string ShowTheResult(string ip, IPRange? findRange)
         {
-            throw new NotImplementedException();
+            if (findRange == null)
+                return $"{ip}: NO";
+            else
+                return $"{ip}: YES ({findRange})";
         }
     }
 }
